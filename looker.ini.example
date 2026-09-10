@@ -1,0 +1,7 @@
+[Looker]
+# Looker Core (Google Cloud core) uses standard HTTPS on port 443.
+# Do NOT append :19999 -- that suffix is only for legacy Looker Original.
+base_url=https://YOUR_INSTANCE.looker.com
+client_id=YOUR_CLIENT_ID
+client_secret=YOUR_CLIENT_SECRET
+verify_ssl=True

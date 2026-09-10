@@ -1,0 +1,19 @@
+# Safety net: if `gcloud functions deploy` is ever run from this top-level
+# folder instead of cloud_function/, none of this should be bundled/uploaded.
+# The real deploy source is the cloud_function/ directory (main.py + requirements.txt only).
+
+.git/
+.gitignore
+.gcloudignore
+.claude/
+venv/
+looker.ini
+looker.ini.example
+*.ipynb
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+watchdog.txt
+README.md
+requirements.txt
+.DS_Store

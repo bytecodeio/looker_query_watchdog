@@ -1,0 +1,19 @@
+# Looker credentials -- never commit real client_id/client_secret
+looker.ini
+
+# Python virtual environment
+venv/
+
+# Python / Jupyter cache
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Internal design doc -- not part of the shipped project
+watchdog.txt
+
+# Claude Code local session/plan state
+.claude/
+
+# OS cruft
+.DS_Store
