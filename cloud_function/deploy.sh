@@ -13,9 +13,17 @@ set -euo pipefail
 
 # --- Edit these ---
 REGION="us-central1"
+# Cloud Functions Gen2 Python runtime. Different GCP environments (e.g. a
+# client's own project) may only offer certain runtimes -- check what's
+# available with: gcloud functions runtimes list --region="${REGION}"
+RUNTIME="python311"
 LOOKER_BASE_URL="https://YOUR_INSTANCE.looker.com"
 LOOKER_CLIENT_ID="YOUR_CLIENT_ID"
-ALERT_WEBHOOK_URL="https://hooks.slack.com/services/XXX/YYY/ZZZ"
+# Leave blank to run in dry-run mode: alerts are logged (visible via
+# `gcloud functions logs read` or view_alerts.sh) instead of posted anywhere.
+# Set to a real Slack/Teams/Google Chat incoming webhook URL to also post
+# there. See README.md "Sending alerts to Slack" for how to create one.
+ALERT_WEBHOOK_URL=""
 ALERT_THRESHOLD_MINUTES="15"
 KILL_THRESHOLD_MINUTES="60"
 ENABLE_AUTO_KILL="false"       # keep false for the first 1-2 weeks
@@ -56,7 +64,7 @@ unset LOOKER_CLIENT_SECRET
 echo "==> Deploying Cloud Function..."
 gcloud functions deploy "${FUNCTION_NAME}" \
     --gen2 \
-    --runtime=python311 \
+    --runtime="${RUNTIME}" \
     --region="${REGION}" \
     --source=. \
     --entry-point=check_running_queries \
@@ -80,8 +88,9 @@ gcloud functions add-iam-policy-binding "${FUNCTION_NAME}" \
     --role="roles/run.invoker"
 
 echo "==> Creating/updating Cloud Scheduler job..."
-if gcloud scheduler jobs describe looker-watchdog-trigger >/dev/null 2>&1; then
+if gcloud scheduler jobs describe looker-watchdog-trigger --location="${REGION}" >/dev/null 2>&1; then
   gcloud scheduler jobs update http looker-watchdog-trigger \
+      --location="${REGION}" \
       --schedule="${SCHEDULE_CRON}" \
       --uri="${FUNCTION_URI}" \
       --http-method=POST \
@@ -89,6 +98,7 @@ if gcloud scheduler jobs describe looker-watchdog-trigger >/dev/null 2>&1; then
       --oidc-token-audience="${FUNCTION_URI}"
 else
   gcloud scheduler jobs create http looker-watchdog-trigger \
+      --location="${REGION}" \
       --schedule="${SCHEDULE_CRON}" \
       --uri="${FUNCTION_URI}" \
       --http-method=POST \

@@ -97,10 +97,11 @@ def check_running_queries(request: Any) -> Dict[str, Any]:
     # `user` -- it has no `email` field, only display_name/first_name/etc.
     user_display_name = q.user.display_name if q.user and q.user.display_name else "Unknown User"
     query_slug = q.slug or "N/A"
-    task_id = q.query_task_id or "N/A"
+    raw_task_id = q.query_task_id
+    task_id = raw_task_id or "N/A"
 
     # 1. Check for Auto-Kill Threshold
-    if ENABLE_AUTO_KILL and elapsed_minutes >= KILL_THRESHOLD_MINUTES and task_id:
+    if ENABLE_AUTO_KILL and elapsed_minutes >= KILL_THRESHOLD_MINUTES and raw_task_id:
       try:
         sdk.kill_query(task_id)
         killed_queries += 1
